@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPay - Receive Payment</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Receive Payment</h1>
+        <form method="POST" enctype="multipart/form-data" class="form">
+            <input type="number" name="amount" placeholder="Enter Amount" required>
+            <p>Scan your ID card:</p>
+            <input type="file" name="id_card" accept="image/*" required>
+            <p>Perform a facial scan:</p>
+            <input type="file" name="facial_scan" accept="image/*" required>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

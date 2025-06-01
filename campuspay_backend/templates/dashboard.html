@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPay - Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, {{ user.name }}</h1>
+        <p>SRN: {{ user.srn }}</p>
+        <p>Balance: ${{ user.balance }}</p>
+
+        <h2>Transaction History</h2>
+        {% if transactions %}
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for txn in transactions %}
+                        <tr>
+                            <td>{{ txn.timestamp }}</td>
+                            <td>${{ txn.amount }}</td>
+                            <td>{{ txn.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No transactions found.</p>
+        {% endif %}
+
+        <!-- Add Funds Form -->
+        <form method="POST" action="{{ url_for('app_routes.create_checkout_session') }}" class="form">
+            <input type="number" name="amount" placeholder="Add Funds" required>
+            <button type="submit">Add Funds</button>
+        </form>
+        <a href="{{ url_for('app_routes.logout') }}" class="logout-button">Logout</a>
+    </div>
+</body>
+</html>

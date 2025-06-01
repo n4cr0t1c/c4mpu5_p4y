@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Scan</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Facial Scan</h1>
+        <p>Please position your face in the camera frame and click "Capture".</p>
+
+        <!-- Live Camera Feed -->
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <!-- Capture Button -->
+        <button id="capture-btn">Capture</button>
+
+        <!-- Status Message -->
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const captureBtn = document.getElementById('capture-btn');
+        const status = document.getElementById('status');
+
+        // Access the user's webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing webcam:", err);
+                status.textContent = "Error accessing webcam. Please allow camera permissions.";
+            });
+
+        // Capture the image and send it to the server
+        captureBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert the canvas image to a Blob
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('image', blob, 'capture.jpg');
+
+                // Send the image to the server
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        status.textContent = data.error;
+                        status.style.color = 'red';
+                    } else {
+                        status.textContent = data.success;
+                        status.style.color = 'green';
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000); // Redirect after 2 seconds
+                    }
+                })
+                .catch(err => {
+                    console.error("Error uploading image:", err);
+                    status.textContent = "Error uploading image. Please try again.";
+                    status.style.color = 'red';
+                });
+            }, 'image/jpeg');
+        });
+    </script>
+</body>
+</html>

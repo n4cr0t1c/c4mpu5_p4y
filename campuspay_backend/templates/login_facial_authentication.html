@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facial Authentication</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Facial Authentication</h1>
+        <p>Please position your face in the camera frame. Authentication will happen automatically.</p>
+
+        <!-- Live Camera Feed -->
+        <div class="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+        </div>
+
+        <!-- Status Message -->
+        <p id="status"></p>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const status = document.getElementById('status');
+        let isAuthenticating = false;
+
+        console.log("Initializing facial authentication script...");
+
+        // Access the user's webcam
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                console.log("Webcam access granted.");
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing webcam:", err);
+                status.textContent = "Error accessing webcam. Please allow camera permissions.";
+                status.style.color = 'red';
+            });
+
+        // Continuously capture frames and send them to the server for authentication
+        function authenticateFace() {
+            if (isAuthenticating) return; // Prevent multiple simultaneous requests
+            isAuthenticating = true;
+
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('image', blob, 'capture.jpg');
+                console.log("Sending image to server for authentication...");
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response data:", data);
+                    isAuthenticating = false;
+
+                    if (data.error) {
+                        console.error("Authentication error:", data.error);
+                        status.textContent = data.error;
+                        status.style.color = 'red';
+                    } else {
+                        console.log("Authentication successful.");
+                        status.textContent = "Authentication successful!";
+                        status.style.color = 'green';
+                        setTimeout(() => {
+                            console.log("Redirecting to dashboard...");
+                            window.location.href = '/dashboard';
+                        }, 2000);
+                    }
+                })
+                .catch(err => {
+                    isAuthenticating = false;
+                    console.error("Error uploading image:", err);
+                    status.textContent = "Error uploading image. Please try again.";
+                    status.style.color = 'red';
+                });
+            }, 'image/jpeg');
+        }
+
+        // Continuously check for facial authentication every 2 seconds
+        setInterval(authenticateFace, 2000);
+    </script>
+</body>
+</html>

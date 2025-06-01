@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPay - Transfer</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>CampusPay - Transfer</h1>
+        <form method="POST" class="form">
+            <input type="text" name="from_srn" placeholder="Sender SRN" required>
+            <input type="text" name="to_srn" placeholder="Recipient SRN" required>
+            <input type="number" name="amount" placeholder="Amount" required>
+            <button type="submit">Pay</button>
+        </form>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <div class="options">
+            <p>Don't have an account? <a href="{{ url_for('app_routes.register') }}">Register</a></p>
+            <p>Already have an account? <a href="{{ url_for('app_routes.login') }}">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>
